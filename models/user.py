@@ -11,8 +11,8 @@ from sqlalchemy.orm import relationship
 class User(BaseModel, Base):
     """This class defines a user by various attributes"""
 
+    __tablename__ = 'users'
     if getenv('HBNB_TYPE_STORAGE') == 'db':
-        __tablename__ = 'users'
         email = Column(String(128), nullable=False)
         _password = Column('password', String(128),
                 nullable=False)
