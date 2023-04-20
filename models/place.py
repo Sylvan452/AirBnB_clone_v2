@@ -38,8 +38,8 @@ class Place(BaseModel, Base):
         latitude = Column(Float, nullable=True)
         longitude = Column(Float, nullable=True)
         reviews = relationship('Review', backref='place',
-                               cascade='all, delete, delete-orphan')
-        amenities = relationship('Amenity', secondary=place_amenity,
+                               cascade='all, delete')
+        amenities = relationship('Amenity', secondary='place_amenity',
                                  viewonly=False, backref='place_amenities')
     else:
         city_id = ""
@@ -58,20 +58,21 @@ class Place(BaseModel, Base):
         """ initializes place """
         super().__init__(*args, **kwargs)
 
-        @property
-        def reviews(self):
-            ''' returns list of review instances with place_id
-                equals to the cyrrent Place.id
-                FileStorage relationship between Place and Review
-            '''
-            from models import storage
-            all_revs = storage.all(Review)
-            lst = []
-            for rev in all_revs.values():
-                if rev.place_id == self.id:
-                    lst.append(rev)
-            return lst
+    @property
+    def reviews(self):
+        ''' returns list of review instances with place_id
+            equals to the cyrrent Place.id
+            FileStorage relationship between Place and Review
+        '''
+        from models import storage
+        all_revs = storage.all(Review)
+        lst = []
+        for rev in all_revs.values():
+            if rev.place_id == self.id:
+                lst.append(rev)
+        return lst
 
+    if getenv('HBNB_TYPE_STORAGE') != 'db':
         @property
         def amenities(self):
             ''' returns the list of Amenity instances
@@ -82,17 +83,6 @@ class Place(BaseModel, Base):
             all_amens = storage.all(Amenity)
             lst = []
             for amen in all_amens.values():
-                if amen.id in self.amenity_ids:
+                if amen.place_id == self.id:
                     lst.append(amen)
             return lst
-
-        @amenities.setter
-        def amenities(self, obj):
-            ''' method for adding an Amenity.id to the
-                attribute amenity_ids. accepts only Amenity
-                objects
-            '''
-            if obj is not None:
-                if isinstance(obj, Amenity):
-                    if obj.id not in self.amenity_ids:
-                        self.amenity_ids.append(obj.id)
