@@ -4,14 +4,13 @@
 from models.amenity import Amenity
 from models.review import Review
 from models.base_model import BaseModel, Base
-import models
-from os import getenv
+from models import storage_type
 from sqlalchemy import Column, String, Integer, Float, ForeignKey
 from sqlalchemy.sql.schema import Table
 from sqlalchemy.orm import relationship
 
 
-if getenv('HBNB_TYPE_STORAGE') == 'db':
+if storage_type == 'db':
     place_amenity = Table('place_amenity', Base.metadata,
                           Column('place_id', String(60),
                                  ForeignKey('places.id'),
@@ -27,7 +26,7 @@ if getenv('HBNB_TYPE_STORAGE') == 'db':
 class Place(BaseModel, Base):
     """ A place to stay """
     __tablename__ = 'places'
-    if getenv('HBNB_TYPE_STORAGE') == 'db':
+    if storage_type == 'db':
         city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
         user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
         name = Column(String(128), nullable=False)
